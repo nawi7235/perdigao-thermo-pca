@@ -9,8 +9,6 @@ data/raw/*
 data/processed/*
 !data/processed/.gitkeep
 
-results/figures/*
-!results/figures/.gitkeep
+results/figures/*.png
 
-results/tables/*
-!results/tables/.gitkeep
+results/tables/*.csv
