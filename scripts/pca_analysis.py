@@ -54,7 +54,7 @@ def main(input_file: str) -> None:
     pc_df = pd.DataFrame(
         pcs[:, :3],
         columns=["PC1", "PC2", "PC3"]
-    ) # nts: only keep first 3 PCs for now since they explain most of the variance and are easier to visualize
+    ) # nts: only keep first 3 PCs for now since they explain most of the variance and are probably easier to visualize
     pc_df["datetime"] = use["datetime"].values
     pc_df["hour"] = pc_df["datetime"].dt.hour
 
@@ -102,7 +102,7 @@ def main(input_file: str) -> None:
     plt.savefig(fig_dir / "pca_loadings.png", dpi=200)
     plt.close()
 
-    # figure 3: PC1 vs PC2
+    # figure 3: PC1 vs PC2... colored by hour of day to see if there are any diurnal patterns in the dominant modes of variability
     plt.figure(figsize=(7, 6))
     sc = plt.scatter(pc_df["PC1"], pc_df["PC2"], c=pc_df["hour"], s=8)
     plt.colorbar(sc, label="Hour of day")

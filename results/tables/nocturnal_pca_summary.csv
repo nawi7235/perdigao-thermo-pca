@@ -1,5 +1,5 @@
 metric,value
-number_of_nocturnal_samples,142144.0
-pc1_explained_variance,0.6528252008221652
-pc2_explained_variance,0.17754854160843245
-pc3_explained_variance,0.09812857856910491
+number_of_nocturnal_samples,142235.0
+pc1_explained_variance,0.6523828364964637
+pc2_explained_variance,0.17176783625543063
+pc3_explained_variance,0.1004805152561928

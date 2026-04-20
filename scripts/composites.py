@@ -42,16 +42,37 @@ def main(input_file: str) -> None:
     ].mean()
     diurnal.to_csv(tab_dir / "mean_diurnal_cycle.csv")
 
-    for var in ["tdry", "rh", "wspd", "theta", "specific_humidity"]:
-        plt.figure(figsize=(8, 4))
-        plt.plot(diurnal.index, diurnal[var], marker="o")
-        plt.xlabel("Hour of day")
-        plt.ylabel(VAR_LABELS[var])
-        plt.title(f"Mean diurnal cycle of {VAR_LABELS[var]}")
-        plt.grid(True, alpha=0.3)
-        plt.tight_layout()
-        plt.savefig(fig_dir / f"diurnal_{var}.png", dpi=200)
-        plt.close()
+    # for var in ["tdry", "rh", "wspd", "theta", "specific_humidity"]:
+    #     plt.figure(figsize=(8, 4))
+    #     plt.plot(diurnal.index, diurnal[var], marker="o")
+    #     plt.xlabel("Hour of day")
+    #     plt.ylabel(VAR_LABELS[var])
+    #     plt.title(f"Mean diurnal cycle of {VAR_LABELS[var]}")
+    #     plt.grid(True, alpha=0.3)
+    #     plt.tight_layout()
+    #     plt.savefig(fig_dir / f"diurnal_{var}.png", dpi=200)
+    #     plt.close()
+    # Multi-panel diurnal cycle figure
+    vars_to_plot = ["tdry", "rh", "specific_humidity", "wspd", "theta"]
+    
+    fig, axes = plt.subplots(3, 2, figsize=(10, 10))
+    axes = axes.flatten()
+    
+    for i, var in enumerate(vars_to_plot):
+        ax = axes[i]
+        ax.plot(diurnal.index, diurnal[var], marker="o")
+        ax.set_xlabel("Hour of day (UTC)")
+        ax.set_ylabel(VAR_LABELS[var])
+        ax.set_title(f"{VAR_LABELS[var]}")
+        ax.grid(True, alpha=0.3)
+    
+    # Remove empty sixth panel if there are only 5 variables to plot
+    fig.delaxes(axes[-1])
+    
+    fig.suptitle("Mean diurnal cycle of surface variables at the Perdigão west profiler site", y=0.98)
+    fig.tight_layout()
+    fig.savefig(fig_dir / "diurnal_multipanel.png", dpi=200, bbox_inches="tight")
+    plt.close(fig)
 
     # extreme composites based on principal component 1
     p90 = merged["PC1"].quantile(0.90)

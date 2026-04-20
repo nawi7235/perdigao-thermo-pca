@@ -1,4 +1,4 @@
-#This script runs the entire data processing and analysis pipeline for the Perdigao dataset. It assumes the following structure:
+#This script runs the entire data processing and analysis pipeline for the Perdigao dataset. It assumes this structure:
 # - scripts/
 #   - build_dataset.py
 #   - pca_analysis.py
@@ -33,16 +33,16 @@ if __name__ == "__main__":
     # repo root
     repo_root = scripts_dir.parent
 
-    #path to t scripts
+    #path scripts
     build_script = scripts_dir/ "build_dataset.py"
     pca_script = scripts_dir/ "pca_analysis.py"
     composites_script = scripts_dir / "composites.py"
     nocturnal_script = scripts_dir/ "nocturnal_analysis.py"
 
-    # output file path
+    # output =  data/processed/perdigao_surface_dataset.csv
     processed_file = repo_root / "data" / "processed" / "perdigao_surface_dataset.csv"
 
-    # make sure output directory exists
+    # make sure output directory exists..
     processed_file.parent.mkdir(parents=True, exist_ok=True)
 
     run([

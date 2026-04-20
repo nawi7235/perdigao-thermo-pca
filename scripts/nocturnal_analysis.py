@@ -45,7 +45,8 @@ def main(input_file: str) -> None:
     df = df.dropna(subset=["datetime"]).copy()
 
     # for the diurnal patterns and nocturnal composites, keep track of the hour of day
-    df["hour"] = df["datetime"].dt.hour
+    df["datetime_local"] = df["datetime"] + pd.Timedelta(hours=1)
+    df["hour"] = df["datetime_local"].dt.hour
     df = add_stability_proxy(df)
 
     # Keep only nighttime / nocturnal hours
@@ -121,9 +122,9 @@ def main(input_file: str) -> None:
     plt.xticks(
         range(3),
         [
-            "Principal component 1",
-            "Principal component 2",
-            "Principal component 3",
+            "PC1",
+            "PC2",
+            "PC3",
         ]
     )
     plt.yticks(range(len(features)), [VAR_LABELS[f] for f in features])
@@ -133,19 +134,45 @@ def main(input_file: str) -> None:
     plt.close()
 
     # ---------- figure 3: nocturnal PC1 vs hour ----------
+    # ---------- Figure: nocturnal PC1 vs hour (improved) ----------
     pc1_hour = pc_df.groupby("hour")["PC1_nocturnal"].mean()
 
+    hours = pc1_hour.index.values
+    values = pc1_hour.values
+
     plt.figure(figsize=(8, 4))
-    plt.plot(pc1_hour.index, pc1_hour.values, marker="o")
-    plt.xlabel("Hour of day")
+
+    # Define nighttime (18–23 and 0–6)
+    night_mask = (hours >= 18) | (hours <= 6)
+
+    # Separate night and day
+    night_hours = hours[night_mask]
+    night_values = values[night_mask]
+
+   # Split into two separate nighttime segments (18-6)
+    night1 = (hours >= 18)
+    night2 = (hours <= 6)
+    
+    # Plot 18–23
+    plt.plot(hours[night1], values[night1], marker="o", color="black")
+    
+    # Plot 0–6 (separate line!)
+    plt.plot(hours[night2], values[night2], marker="o", color="black", label="Nocturnal hours")
+
+    # # Plot daytime as grey points
+    # day_mask = ~night_mask
+    # plt.scatter(hours[day_mask], values[day_mask], color="lightgray", label="Daytime hours")
+
+    plt.xlabel("Hour of day (UTC)")
     plt.ylabel("Mean principal component 1")
     plt.title("Mean nocturnal principal component 1 by hour")
+
     plt.grid(True, alpha=0.3)
+    plt.legend()
     plt.tight_layout()
     plt.savefig(fig_dir / "pc1_nocturnal_by_hour.png", dpi=200)
     plt.close()
-
-    # ---------- figure 4: nocturnal PC1 vs PC2 ----------
+    # figure 4: nocturnal PC1 vs PC2
     plt.figure(figsize=(7, 6))
     sc = plt.scatter(
         pc_df["PC1_nocturnal"],
@@ -161,7 +188,7 @@ def main(input_file: str) -> None:
     plt.savefig(fig_dir / "pc1_vs_pc2_nocturnal.png", dpi=200)
     plt.close()
 
-    # ---------- Nocturnal extreme composites ----------
+    #Nocturnal extreme composites 
     p90 = merged["PC1_nocturnal"].quantile(0.90)
     p10 = merged["PC1_nocturnal"].quantile(0.10)
 
@@ -178,7 +205,7 @@ def main(input_file: str) -> None:
     })
     comp.to_csv(tab_dir / "pc1_composites_nocturnal.csv")
 
-    # Standardized comparison across variables with different units
+    # Standardized comparison across variables with different units but also to put the anomalies on a more comparable scale. 
     comp_norm = (
         comp - comp.mean(axis=1).values[:, None]
     ) / comp.std(axis=1).replace(0, np.nan).values[:, None]
@@ -199,7 +226,7 @@ def main(input_file: str) -> None:
         marker="o",
         label="Low values of nocturnal principal component 1"
     )
-
+# dont forget to label the x-axis with the variable names, rotated for readability  
     plt.xticks(x, [VAR_LABELS[idx] for idx in comp_norm.index], rotation=45, ha="right")
     plt.ylabel("Standardized anomaly")
     plt.title("Standardized nocturnal composite surface states for high and low values of principal component 1")
@@ -208,7 +235,7 @@ def main(input_file: str) -> None:
     plt.savefig(fig_dir / "pc1_extreme_composites_nocturnal.png", dpi=200)
     plt.close()
 
-    # ---------- get a summary table ----------
+    # summary table for values
     summary = pd.DataFrame({
         "metric": [
             "number_of_nocturnal_samples",
